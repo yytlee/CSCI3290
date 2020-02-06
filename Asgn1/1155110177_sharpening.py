@@ -65,7 +65,7 @@ def gaussian_kernel(size, sigma):
     kernel = np.exp(-((x*x+y*y) / (2 * (sigma**2))))
     # kernel = kernel / (2*PI*(sigma**2))
     kernel = kernel / kernel.sum()
-    print(kernel)
+    # print(kernel)
 
     # ######################################################################## #
     assert isinstance(kernel, np.ndarray), 'please use ndarray as you kernel data format!'
@@ -83,12 +83,16 @@ def conv(im_in, kernel):
 
     # ##################### Implement this function here ##################### #
 
-
+    # https://stackoverflow.com/questions/43086557/convolve2d-just-by-using-numpy
+    # tuple(): ordered and unchangeable
     s = kernel.shape + tuple(np.subtract(im_in.shape, kernel.shape) + 1)
-    print(s)
-    subM = np.lib.stride_tricks.as_strided(im_in, shape = s, strides = im_in.strides * 2)
-    print(subM)
-    m = np.einsum('ij,ijkl->kl', kernel, subM)
+    # print(s)
+    # numpy.lib.stride_tricks.as_strided(x, shape=None, strides=None, subok=False, writeable=True)
+    tmp = np.lib.stride_tricks.as_strided(im_in, s, im_in.strides * 2)
+    print(tmp)
+    # numpy.einsum(subscripts, *operands, out=None, dtype=None, order='K', casting='safe', optimize=False)
+    m = np.einsum('ij,ijkl->kl', kernel, tmp)
+    # print(m)
     return m
 
     # ######################################################################## #
@@ -105,16 +109,16 @@ def sharpen(im_input, im_smoothed):
 
     # ##################### Implement this function here ##################### #
 
-    print(im_input.shape[0])
-    print(im_smoothed.shape[0])
+    # print(im_input.shape[0])
+    # print(im_smoothed.shape[0])
     x, y = im_input.shape
-    size = im_smoothed.shape[0]
-    crop = im_input[x//2-(size//2):x//2-(size//2) + size, y//2-(size//2):y//2-(size//2) + size]
+    s = im_smoothed.shape[0]
+    crop = im_input[x//2-(s//2):x//2-(s//2) + s, y//2-(s//2):y//2-(s//2) + s]
     detail = crop - im_smoothed
     sharpened = crop + detail
-    print(np.ndarray.max(sharpened))
-    print(np.ndarray.min(sharpened))
-    sharpened = np.clip(sharpened, 0, 1)
+    # print(np.ndarray.max(sharpened))
+    # print(np.ndarray.min(sharpened))
+    sharpened = np.clip(sharpened, 0, 1) # solve problem of value out-bound
     return sharpened
 
     # ######################################################################## #
@@ -122,10 +126,10 @@ def sharpen(im_input, im_smoothed):
 
 def main():
     parser = argparse.ArgumentParser(description='Image Sharpening')
-    parser.add_argument('--input', type=str, default='test_01.png', help='path of the input image')
+    parser.add_argument('--input', type=str, default='test_03.png', help='path of the input image')
     parser.add_argument('--kernel', type=int, default=3, help='the square kernel size')
     parser.add_argument('--sigma', type=float, default=1.5, help='the standard deviation in gaussian kernel')
-    parser.add_argument('--output', type=str, default='output_01.png', help='the path of the output image')
+    parser.add_argument('--output', type=str, default='output_03.png', help='the path of the output image')
     args = parser.parse_args()
 
     im = imread(args.input)
