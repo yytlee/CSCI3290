@@ -98,7 +98,7 @@ def sharpen(im_input, im_smoothed):
 def main():
     parser = argparse.ArgumentParser(description='Image Sharpening')
     parser.add_argument('--input', type=str, default='test_01.png', help='path of the input image')
-    parser.add_argument('--kernel', type=int, default=5, help='the square kernel size')
+    parser.add_argument('--kernel', type=int, default=3, help='the square kernel size')
     parser.add_argument('--sigma', type=float, default=1.5, help='the standard deviation in gaussian kernel')
     parser.add_argument('--output', type=str, default='output_01.png', help='the path of the output image')
     args = parser.parse_args()
