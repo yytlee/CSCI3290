@@ -8,9 +8,9 @@
 # and regulations, as contained in the website
 # http://www.cuhk.edu.hk/policy/academichonesty/ *
 # Assignment 2
-# Name :
-# Student ID :
-# Email Addr :
+# Name : Lee Tsz Yan
+# Student ID : 1155110177
+# Email Addr : 1155110177@link.cuhk.edu.hk
 #
 
 import cv2
@@ -33,6 +33,20 @@ def extract_and_match_feature(img_1, img_2, ratio_test=0.7):
     list_pairs_matched_keypoints = []
 
     # to be completed ....
+    sift = cv2.xfeatures2d.SIFT_create()
+    kp1, des1 = sift.detectAndCompute(img_1, None)
+    kp2, des2 = sift.detectAndCompute(img_2, None)
+
+    bf = cv2.BFMatcher()
+    good = []
+    matches = bf.knnMatch(des1, des2, k = 2)
+    for m, n in matches:
+        if m.distance < ratio_test * n.distance:
+            good.append(m)
+
+    src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+    dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+    list_pairs_matched_keypoints = np.array([[i, j] for i, j in zip(src_pts, dst_pts)])
 
     return list_pairs_matched_keypoints
 
@@ -57,6 +71,31 @@ def find_homography_ransac(list_pairs_matched_keypoints,
 
     # to be completed ...
 
+    src, des = zip(*list_pairs_matched_keypoints)
+    src = np.float32(src).reshape(-1, 1, 2)
+    des = np.float32(des).reshape(-1, 1, 2)
+    M, mask = cv2.findHomography(src, des, cv2.RANSAC, ransacReprojThreshold=threshold_reprojection_error, maxIters=max_num_trial, mask=threshold_ratio_inliers)
+    best_H = M
+    # if(mask > threshold_ratio_inliers):
+    #     best_H = M
+    # matchesMask = mask.ravel().tolist()
+
+    # h, w, d = img_1.shape
+    # pts = np.float32([ [0,0],[0, h - 1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+    # dst = cv2.perspectiveTransform(pts,M)
+    
+    # img_2 = cv2.polylines(img_2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
+    # print(pts)
+    # print(dst)
+    # draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+    #                singlePointColor = None,
+    #                matchesMask = matchesMask, # draw only inliers
+    #                flags = 2)
+
+    # img3 = cv2.drawMatches(img_1,kp1,img_2,kp2,good,None,**draw_params)
+
+    # cv2.imwrite("img3.png", img3)
+
     return best_H
 
 
@@ -74,7 +113,38 @@ def warp_blend_image(img_1, H, img_2):
     img_panorama = None
 
     # to be completed ...
+    print(H)
+    h, w, d = img_2.shape
+    h *= 2
+    w *= 2
+    size = (w, h)
+    H = np.linalg.inv(H)
+    #np.resize(img_1, size)
+    img_panorama = cv2.warpPerspective(img_2, H, size)
+    img_panorama[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
 
+
+    # img_1 = cv2.resize(img_1, new_img.shape[1::-1])
+    # cv2.imwrite("new.png", img_1)
+    # img_panorama = cv2.addWeighted(img_1, 0.5, new_img, 0.5, 0)
+
+    # foreground, background = new_img.copy(), img_1.copy()
+
+    # foreground_height = foreground.shape[0]
+    # foreground_width = foreground.shape[1]
+    # alpha =0.5
+
+    # # do composite on the upper-left corner of background image.
+    # blended_portion = cv2.addWeighted(foreground,
+    #             alpha,
+    #             background[:foreground_height,:foreground_width,:],
+    #             1 - alpha,
+    #             0,
+    #             background)
+    # background[:foreground_height,:foreground_width,:] = blended_portion
+    # cv2.imshow('composited image', background)
+    
+    # cv2.waitKey(1000)
     return img_panorama
 
 
