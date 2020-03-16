@@ -77,25 +77,7 @@ def find_homography_ransac(list_pairs_matched_keypoints,
     des = np.float32(des).reshape(-1, 1, 2)
     M, mask = cv2.findHomography(src, des, cv2.RANSAC, ransacReprojThreshold=threshold_reprojection_error, maxIters=max_num_trial, mask=threshold_ratio_inliers)
     best_H = M
-    # if(mask > threshold_ratio_inliers):
-    #     best_H = M
-    # matchesMask = mask.ravel().tolist()
 
-    # h, w, d = img_1.shape
-    # pts = np.float32([ [0,0],[0, h - 1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-    # dst = cv2.perspectiveTransform(pts,M)
-    
-    # img_2 = cv2.polylines(img_2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
-    # print(pts)
-    # print(dst)
-    # draw_params = dict(matchColor = (0,255,0), # draw matches in green color
-    #                singlePointColor = None,
-    #                matchesMask = matchesMask, # draw only inliers
-    #                flags = 2)
-
-    # img3 = cv2.drawMatches(img_1,kp1,img_2,kp2,good,None,**draw_params)
-
-    # cv2.imwrite("img3.png", img3)
 
     return best_H
 
@@ -134,43 +116,6 @@ def warp_blend_image(img_1, H, img_2):
             else:
                 img_panorama[i, j] = new_img2[i, j]
 
-
-
-    # new_img = np.zeros([h, w, 3]).astype(np.uint8)
-    # new_img[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
-    # print(new_img.shape)
-    # print(type(new_img))
-    # print(type(new_img2))
-    # print(type(img_1[0][0][0]))
-    # print(type(new_img[0][0][0]))
-    # print(type(new_img2[0][0][0]))
-    # print(new_img2.shape)
-    # img_panorama = cv2.addWeighted(new_img, 0.5, new_img2, 0.5, 0.0)
-
-
-
-    # img_panorama[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
-
-
-    # img_1 = cv2.resize(img_1, new_img.shape[1::-1])
-    # cv2.imwrite("new.png", img_1)
-    # img_panorama = cv2.addWeighted(img_1, 0.5, new_img, 0.5, 0)
-
-    # foreground, background = new_img.copy(), img_1.copy()
-
-    # foreground_height = foreground.shape[0]
-    # foreground_width = foreground.shape[1]
-    # alpha =0.5
-
-    # # do composite on the upper-left corner of background image.
-    # blended_portion = cv2.addWeighted(foreground,
-    #             alpha,
-    #             background[:foreground_height,:foreground_width,:],
-    #             1 - alpha,
-    #             0,
-    #             background)
-    # background[:foreground_height,:foreground_width,:] = blended_portion
-    # cv2.imshow('composited image', background)
     
     return img_panorama
 
