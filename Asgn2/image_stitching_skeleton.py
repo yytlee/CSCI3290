@@ -44,9 +44,10 @@ def extract_and_match_feature(img_1, img_2, ratio_test=0.7):
         if m.distance < ratio_test * n.distance:
             good.append(m)
 
-    src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-    dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-    list_pairs_matched_keypoints = np.array([[i, j] for i, j in zip(src_pts, dst_pts)])
+    # reference to opencv doc
+    src = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+    dst = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+    list_pairs_matched_keypoints = np.array([[i, j] for i, j in zip(src, dst)])
 
     return list_pairs_matched_keypoints
 
@@ -113,15 +114,42 @@ def warp_blend_image(img_1, H, img_2):
     img_panorama = None
 
     # to be completed ...
-    print(H)
     h, w, d = img_2.shape
     h *= 2
     w *= 2
     size = (w, h)
     H = np.linalg.inv(H)
     #np.resize(img_1, size)
-    img_panorama = cv2.warpPerspective(img_2, H, size)
-    img_panorama[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
+    new_img2 = cv2.warpPerspective(img_2, H, size)
+
+    img_panorama = np.zeros([h, w, 3])
+    # refernce to Zhansijing
+    for i in range(h):
+        for j in range(w):
+            if i <img_1.shape[0] and j < img_1.shape[1]:
+                if new_img2[i, j].any():
+                    img_panorama[i, j] = np.clip(0.5 * img_1[i, j] + 0.5 * new_img2[i, j], 0, 255)
+                else:
+                    img_panorama[i, j] = img_1[i, j]
+            else:
+                img_panorama[i, j] = new_img2[i, j]
+
+
+
+    # new_img = np.zeros([h, w, 3]).astype(np.uint8)
+    # new_img[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
+    # print(new_img.shape)
+    # print(type(new_img))
+    # print(type(new_img2))
+    # print(type(img_1[0][0][0]))
+    # print(type(new_img[0][0][0]))
+    # print(type(new_img2[0][0][0]))
+    # print(new_img2.shape)
+    # img_panorama = cv2.addWeighted(new_img, 0.5, new_img2, 0.5, 0.0)
+
+
+
+    # img_panorama[0:img_1.shape[0], 0:img_1.shape[1]] = img_1
 
 
     # img_1 = cv2.resize(img_1, new_img.shape[1::-1])
@@ -144,7 +172,6 @@ def warp_blend_image(img_1, H, img_2):
     # background[:foreground_height,:foreground_width,:] = blended_portion
     # cv2.imshow('composited image', background)
     
-    # cv2.waitKey(1000)
     return img_panorama
 
 
