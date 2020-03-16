@@ -78,7 +78,6 @@ def find_homography_ransac(list_pairs_matched_keypoints,
     M, mask = cv2.findHomography(src, des, cv2.RANSAC, ransacReprojThreshold=threshold_reprojection_error, maxIters=max_num_trial, mask=threshold_ratio_inliers)
     best_H = M
 
-
     return best_H
 
 
