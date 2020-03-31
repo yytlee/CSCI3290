@@ -157,8 +157,7 @@ op_dict = {
 if __name__ == "__main__":
     # read arguments
     parser = ArgParser(description='Tone Mapping')
-    parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image", default="test_images/doll.hdr")
-    # parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image")
+    parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image")
     parser.add_argument("--op", type=str, default="all", choices=["durand", "log", "all"],
                         help="tone mapping operators")
     args = parser.parse_args()
