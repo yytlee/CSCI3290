@@ -74,6 +74,9 @@ def map_luminance(input: np.ndarray, luminance: np.ndarray, new_luminance: np.nd
     # write you code here
     # to be completed
     output = np.array(input)
+    output[:, :, 0] = input[:, :, 0] * new_luminance[:, :] / luminance[:, :]
+    output[:, :, 1] = input[:, :, 1] * new_luminance[:, :] / luminance[:, :]
+    output[:, :, 2] = input[:, :, 2] * new_luminance[:, :] / luminance[:, :]
     # write you code here
     return output
 
@@ -87,6 +90,16 @@ def log_tonemap(input: np.ndarray) -> np.ndarray:
     # write you code here
     # to be completed
     output = np.array(input)
+    luminance = compute_luminance(input)
+    alpha = 0.05
+    lmin = np.amin(luminance)
+    lmax = np.amax(luminance)
+    tau = alpha * (lmax - lmin)
+    log_min = np.log(lmin + tau)
+    log_max = np.log(lmax + tau)
+    divisor = log_max - log_min
+    display = (np.log(luminance[:, :] + tau) - log_min) / divisor
+    output = map_luminance(input, luminance, display)
     # write you code here
     return output
 
@@ -103,6 +116,7 @@ def bilateral_filter(input: np.ndarray, size: int, sigma_space: float, sigma_ran
     # write you code here
     # to be completed
     output = np.array(input)
+    output = cv2.bilateralFilter(input, size, sigma_range, sigma_space)
     # write you code here
     return output
 
@@ -116,6 +130,20 @@ def durand_tonemap(input: np.ndarray) -> np.ndarray:
     # write you code here
     # to be completed
     output = np.array(input)
+    contrast = 50
+    luminance = compute_luminance(input)
+    log_intensity = np.log10(luminance)
+
+    sigma_space = 0.02 * min(luminance.shape)
+    sigam_range = 0.4
+    window_size = 2 * max(round(1.5 * sigma_space), 1) + 1
+    base_layer = bilateral_filter(log_intensity, window_size, sigma_space, sigam_range)
+
+    detail_layer = log_intensity[:, :] - base_layer[:, :]
+    gamma = np.log10(contrast) / (np.amax(base_layer) - np.amin(base_layer))
+    new_luminance = 10 ** (gamma * base_layer + detail_layer[:, :])
+    display = new_luminance[:, :] / (10 ** (np.amax(gamma * base_layer)))
+    output = map_luminance(input, luminance, display)
     # write you code here
     return output
 
@@ -129,7 +157,8 @@ op_dict = {
 if __name__ == "__main__":
     # read arguments
     parser = ArgParser(description='Tone Mapping')
-    parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image")
+    parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image", default="test_images/doll.hdr")
+    # parser.add_argument("filename", metavar="HDRImage", type=str, help="path to the hdr image")
     parser.add_argument("--op", type=str, default="all", choices=["durand", "log", "all"],
                         help="tone mapping operators")
     args = parser.parse_args()
