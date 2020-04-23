@@ -100,6 +100,7 @@ def log_tonemap(input: np.ndarray) -> np.ndarray:
     divisor = log_max - log_min
     display = (np.log(luminance[:, :] + tau) - log_min) / divisor
     output = map_luminance(input, luminance, display)
+    output = np.clip(output, 0, 1)
     # write you code here
     return output
 
@@ -116,6 +117,29 @@ def bilateral_filter(input: np.ndarray, size: int, sigma_space: float, sigma_ran
     # write you code here
     # to be completed
     output = np.array(input)
+    # rang = lambda size, sigma: np.exp(-(size ** 2)/(2 * sigma ** 2))/(2 * np.pi * (sigma ** 2))
+    # # spatial = np.fromfunction(lambda x, y: (np.exp ** ((-1*((x-(size-1)/2)**2+(y-(size-1)/2)**2))/(2*sigma_space**2)), (size, size)/(2*np.pi*sigma_space**2)))
+    # # spatial /= np.sum(spatial)
+    # dist = lambda i, j, k ,l: np.sqrt((i-k)**2 + (j-l)**2)
+    # mid = size / 2
+    # for i, j in np.ndindex(input.shape):
+    #     i_filter = 0.0
+    #     kx = 0.0
+    #     for k in range(size):
+    #         for l in range(size):
+    #             next_x = int(i - (mid - k))
+    #             next_y = int(j - (mid - l))
+    #             next_x = next_x % len(input)
+    #             next_y = next_y % len(input)
+    #             filt = rang(input[next_x][next_y] - input[i][j], sigma_range) * rang(dist(next_x, next_y, i, j), sigma_space)
+    #             i_filter += input[next_x][next_y] * filt
+    #             kx += filt
+    #     i_filter = i_filter / kx
+    #     output[i][j] = int(round(i_filter))
+
+
+
+
     output = cv2.bilateralFilter(input, size, sigma_range, sigma_space)
     # write you code here
     return output
@@ -144,6 +168,7 @@ def durand_tonemap(input: np.ndarray) -> np.ndarray:
     new_luminance = 10 ** (gamma * base_layer + detail_layer[:, :])
     display = new_luminance[:, :] / (10 ** (np.amax(gamma * base_layer)))
     output = map_luminance(input, luminance, display)
+    output = np.clip(output, 0, 1)
     # write you code here
     return output
 
