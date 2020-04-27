@@ -8,9 +8,9 @@
 # and regulations, as contained in the website
 # http://www.cuhk.edu.hk/policy/academichonesty/ *
 # Assignment 4
-# Name :
-# Student ID :
-# Email Addr :
+# Name : Lee Tsz Yan
+# Student ID : 1155110177
+# Email Addr : 1155110177@link.cuhk.edu.hk
 #
 
 ################################################################
@@ -133,6 +133,12 @@ def train(epoch, data_loader):
         input, target = data[0].to(device), data[1].to(device)
         ######################
         # write your code here
+        optimizer.zero_grad()
+        output = model(input)
+        loss = loss_function(output, target)
+        loss_metric.add(loss)
+        loss.backward()
+        optimizer.step()
 
     print("[Train] Epoch {cur}/{total} complete: Avg. Loss={val:.4f}".format(cur=epoch, total=opt.num_epoch,
                                                                              val=loss_metric.average()))

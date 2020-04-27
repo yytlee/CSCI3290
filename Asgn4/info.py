@@ -24,7 +24,7 @@ class Info():
 
 
 info = Info(
-    name="your name",
-    id="1155xxxxxx",
-    email="username@example.com"
+    name="Lee Tsz Yan",
+    id="1155110177",
+    email="1155110177@link.cuhk.edu.hk"
 )
