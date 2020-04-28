@@ -100,7 +100,7 @@ if checkpoint:
 model.to(device)
 
 # optimizer
-optimizer = optim.Adam(model.parameters(), lr=opt.lr)
+optimizer = optim.AdamW(model.parameters(), lr=opt.lr)
 if checkpoint:
     optimizer.load_state_dict(checkpoint_["optimizer_state_dict"])
 
